@@ -97,7 +97,7 @@ class MainActivity : AppCompatActivity(), PermissionListener {
 
     override fun onPermissionDenied(p0: PermissionDeniedResponse?) {
         //se negar fica nessa tela pedindo permissao
-        Toast.makeText(this,"Permissao para tirar foto negada", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this,"Permissao para falar negada", Toast.LENGTH_SHORT).show()
     }
 
     override fun onPermissionRationaleShouldBeShown(

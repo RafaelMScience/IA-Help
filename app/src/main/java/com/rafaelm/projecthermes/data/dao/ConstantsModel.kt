@@ -7,6 +7,6 @@ abstract class ConstantsModel {
         const val keyPrimaryApi = ""
 
         //crie um arquivo chamado de Constants e colo esses dados com a chave
-        //aqui deve ser adicionado as credenciais azure
+        //aqui deve ser adicionado as credenciais azure LUIS
     }
 }
