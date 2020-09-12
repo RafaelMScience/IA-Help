@@ -1,15 +1,22 @@
 package com.rafaelm.projecthermes
 
+import android.Manifest
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
-import com.rafaelm.projecthermes.data.dao.Constants.Companion.key
-import com.rafaelm.projecthermes.data.dao.Constants.Companion.RQ_SPEECH_REC
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.karumi.dexter.Dexter
+import com.karumi.dexter.PermissionToken
+import com.karumi.dexter.listener.PermissionDeniedResponse
+import com.karumi.dexter.listener.PermissionGrantedResponse
+import com.karumi.dexter.listener.PermissionRequest
+import com.karumi.dexter.listener.single.PermissionListener
 import com.rafaelm.projecthermes.data.api.RetrofitAzure
+import com.rafaelm.projecthermes.data.dao.Constants.Companion.RQ_SPEECH_REC
+import com.rafaelm.projecthermes.data.dao.Constants.Companion.key
 import com.rafaelm.projecthermes.data.model.ModelAzure
 import kotlinx.android.synthetic.main.activity_main.*
 import retrofit2.Call
@@ -17,20 +24,23 @@ import retrofit2.Callback
 import retrofit2.Response
 import java.util.*
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), PermissionListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         btn_speech.setOnClickListener {
-            askSpeechInput()
+            Dexter.withContext(this)
+                .withPermission(Manifest.permission.RECORD_AUDIO)
+                .withListener(this)
+                .check()
         }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if(requestCode == RQ_SPEECH_REC && resultCode == Activity.RESULT_OK){
+        if (requestCode == RQ_SPEECH_REC && resultCode == Activity.RESULT_OK) {
             val result = data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
             val textResult = result?.get(0).toString()
 
@@ -38,10 +48,10 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun askSpeechInput(){
-        if(!SpeechRecognizer.isRecognitionAvailable(this)){
+    private fun askSpeechInput() {
+        if (!SpeechRecognizer.isRecognitionAvailable(this)) {
             Toast.makeText(this, "Fala nao liberado", Toast.LENGTH_SHORT).show()
-        }else{
+        } else {
             val i = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
             i.putExtra(
                 RecognizerIntent.EXTRA_LANGUAGE_MODEL,
@@ -79,5 +89,21 @@ class MainActivity : AppCompatActivity() {
             }
 
         })
+    }
+
+    override fun onPermissionGranted(p0: PermissionGrantedResponse?) {
+        askSpeechInput()
+    }
+
+    override fun onPermissionDenied(p0: PermissionDeniedResponse?) {
+        //se negar fica nessa tela pedindo permissao
+        Toast.makeText(this,"Permissao para tirar foto negada", Toast.LENGTH_SHORT).show()
+    }
+
+    override fun onPermissionRationaleShouldBeShown(
+        permission: PermissionRequest?,
+        token: PermissionToken?
+    ) {
+        token!!.continuePermissionRequest()
     }
 }

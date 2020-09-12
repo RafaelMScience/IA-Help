@@ -48,4 +48,6 @@ dependencies {
     implementation "com.squareup.retrofit2:adapter-rxjava2:$retrofit_version"
     implementation "com.squareup.retrofit2:converter-gson:$retrofit_version"
 
+    //api externa
+    implementation 'com.karumi:dexter:6.1.2'
 }
