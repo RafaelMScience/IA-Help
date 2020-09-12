@@ -2,8 +2,6 @@ package com.rafaelm.projecthermes.data.api
 
 import com.rafaelm.projecthermes.data.model.ModelAzure
 import retrofit2.http.GET
-import retrofit2.http.POST
-import retrofit2.http.Query
 import retrofit2.http.QueryMap
 
 interface NetworkServices {
