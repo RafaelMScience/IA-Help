@@ -20,9 +20,7 @@ import com.rafaelm.projecthermes.data.api.RetrofitChatbot
 import com.rafaelm.projecthermes.data.dao.Constants.Companion.RQ_SPEECH_REC
 import com.rafaelm.projecthermes.data.dao.Constants.Companion.key
 import com.rafaelm.projecthermes.data.dao.Constants.Companion.keyChatBotApi
-import com.rafaelm.projecthermes.data.model.chatbot.Answer
 import com.rafaelm.projecthermes.data.model.chatbot.AnswerResponse
-import com.rafaelm.projecthermes.data.model.chatbot.ChatBot
 import com.rafaelm.projecthermes.data.model.chatbot.ChatRequest
 import com.rafaelm.projecthermes.data.model.luis.ModelAzure
 import kotlinx.android.synthetic.main.activity_main.*

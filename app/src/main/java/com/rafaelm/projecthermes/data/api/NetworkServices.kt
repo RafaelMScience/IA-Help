@@ -1,6 +1,6 @@
 package com.rafaelm.projecthermes.data.api
 
-import com.rafaelm.projecthermes.data.model.chatbot.Answer
+import com.rafaelm.projecthermes.data.dao.Constants.Companion.keyPostChatApi
 import com.rafaelm.projecthermes.data.model.chatbot.AnswerResponse
 import com.rafaelm.projecthermes.data.model.chatbot.ChatRequest
 import com.rafaelm.projecthermes.data.model.luis.ModelAzure
@@ -13,9 +13,9 @@ interface NetworkServices {
     fun postSendText(
         @QueryMap queryMap: Map<String,String>
 
-    ): retrofit2.Call<ModelAzure>
+    ): Call<ModelAzure>
 
-    @POST("qnamaker/knowledgebases/054a680d-188a-437b-b14a-84ba9ed0d517/generateAnswer")
+    @POST("qnamaker/knowledgebases/${keyPostChatApi}/generateAnswer")
     fun postChat(@Header("Authorization")token: String, @Body question: ChatRequest): Call<AnswerResponse>
 
 }
