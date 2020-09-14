@@ -6,6 +6,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
+import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.karumi.dexter.Dexter
@@ -15,9 +16,15 @@ import com.karumi.dexter.listener.PermissionGrantedResponse
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.single.PermissionListener
 import com.rafaelm.projecthermes.data.api.RetrofitAzure
+import com.rafaelm.projecthermes.data.api.RetrofitChatbot
 import com.rafaelm.projecthermes.data.dao.Constants.Companion.RQ_SPEECH_REC
 import com.rafaelm.projecthermes.data.dao.Constants.Companion.key
-import com.rafaelm.projecthermes.data.model.ModelAzure
+import com.rafaelm.projecthermes.data.dao.Constants.Companion.keyChatBotApi
+import com.rafaelm.projecthermes.data.model.chatbot.Answer
+import com.rafaelm.projecthermes.data.model.chatbot.AnswerResponse
+import com.rafaelm.projecthermes.data.model.chatbot.ChatBot
+import com.rafaelm.projecthermes.data.model.chatbot.ChatRequest
+import com.rafaelm.projecthermes.data.model.luis.ModelAzure
 import kotlinx.android.synthetic.main.activity_main.*
 import retrofit2.Call
 import retrofit2.Callback
@@ -35,6 +42,10 @@ class MainActivity : AppCompatActivity(), PermissionListener {
                 .withPermission(Manifest.permission.RECORD_AUDIO)
                 .withListener(this)
                 .check()
+        }
+
+        btn_chat.setOnClickListener {
+            chatbot()
         }
     }
 
@@ -105,5 +116,72 @@ class MainActivity : AppCompatActivity(), PermissionListener {
         token: PermissionToken?
     ) {
         token!!.continuePermissionRequest()
+    }
+
+    private fun chatbot(){
+
+//        val textoChat = edt_testeEnvio.text.toString()
+//        val testeAcht : Answer = Answer()
+//
+//        testeAcht.questions = listOf("oi")
+//
+//        val testeApi = ChatBot(true, listOf(testeAcht))
+//
+//        val retrofitChatbot = RetrofitChatbot.apiConnection().postChat("", listOf("oi"))
+
+//        val textoChat = edt_testeEnvio.text.toString()
+//        val testeAcht : MutableList<String> = ArrayList()
+//
+//        testeAcht.add(textoChat)
+////        val testeApi = Answer(questions = testeAcht)
+//        val testeApi = Answer(question = textoChat)
+
+
+//        val retrofitChatbot = RetrofitChatbot.apiConnection().postChat("", testeApi)
+
+//        val testeApi = ChatRequest(textoChat)
+//
+//        val retrofitChatbot = RetrofitChatbot.apiConnection().postChat("", testeApi)
+//
+//        retrofitChatbot.enqueue(object : Callback<Answer>{
+//            override fun onResponse(call: Call<Answer>, response: Response<Answer>) {
+//                txt_teste.text = response.body()?.answer.toString()
+//                Log.d("teste",""+response.body()?.toString())
+//                Log.d("teste",""+response.body())
+//                Log.d("teste",""+response.message().toString())
+//                Log.d("teste",""+response.code().toString())
+//            }
+//
+//            override fun onFailure(call: Call<Answer>, t: Throwable) {
+//                TODO("Not yet implemented")
+//            }
+//
+//        })
+        val textoChat = edt_testeEnvio.text.toString()
+        val testeAcht : MutableList<String> = ArrayList()
+
+        testeAcht.add(textoChat)
+
+        val testeApi = ChatRequest(textoChat)
+
+        val retrofitChatbot = RetrofitChatbot.apiConnection().postChat(keyChatBotApi, testeApi)
+
+        retrofitChatbot.enqueue(object: Callback<AnswerResponse> {
+            override fun onResponse(
+                call: Call<AnswerResponse>,
+                response: Response<AnswerResponse>
+            ) {
+
+                response.body()?.answers?.forEach {
+                    txt_teste.text = it.answer
+
+                }
+            }
+
+            override fun onFailure(call: Call<AnswerResponse>, t: Throwable) {
+                TODO("Not yet implemented")
+            }
+        })
+
     }
 }

@@ -1,7 +1,5 @@
-package com.rafaelm.projecthermes.data.model
+package com.rafaelm.projecthermes.data.model.luis
 
-
-import com.google.gson.annotations.SerializedName
 
 data class ModelAzure(
     val prediction: Prediction = Prediction(),
