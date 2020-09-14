@@ -6,6 +6,7 @@ abstract class ConstantsModel {
         const val key = ""
         const val keyPrimaryApi = ""
         const val keyChatBotApi = ""
+        const val keyPostChatApi = ""
 
         //crie um arquivo chamado de Constants e colo esses dados com a chave
         //aqui deve ser adicionado as credenciais azure LUIS

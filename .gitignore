@@ -12,4 +12,5 @@
 /captures
 .externalNativeBuild
 .cxx
+
 /app/src/main/java/com/rafaelm/projecthermes/data/dao/Constants.kt
