@@ -9,6 +9,7 @@ import android.speech.SpeechRecognizer
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.PermissionToken
 import com.karumi.dexter.listener.PermissionDeniedResponse
@@ -23,6 +24,7 @@ import com.rafaelm.projecthermes.data.dao.Constants.Companion.keyChatBotApi
 import com.rafaelm.projecthermes.data.model.chatbot.AnswerResponse
 import com.rafaelm.projecthermes.data.model.chatbot.ChatRequest
 import com.rafaelm.projecthermes.data.model.luis.ModelAzure
+import com.rafaelm.projecthermes.view.adapter.RecyclerViewAdapterChat
 import kotlinx.android.synthetic.main.activity_main.*
 import retrofit2.Call
 import retrofit2.Callback
@@ -43,7 +45,7 @@ class MainActivity : AppCompatActivity(), PermissionListener {
         }
 
         btn_chat.setOnClickListener {
-            chatbot()
+//            chatbot(textResult)
         }
     }
 
@@ -53,7 +55,8 @@ class MainActivity : AppCompatActivity(), PermissionListener {
             val result = data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
             val textResult = result?.get(0).toString()
 
-            conectionApi(textResult)
+            chatbot(textResult)
+//            conectionApi(textResult)
         }
     }
 
@@ -116,7 +119,7 @@ class MainActivity : AppCompatActivity(), PermissionListener {
         token!!.continuePermissionRequest()
     }
 
-    private fun chatbot(){
+    private fun chatbot(textResult: String) {
 
 //        val textoChat = edt_testeEnvio.text.toString()
 //        val testeAcht : Answer = Answer()
@@ -153,14 +156,13 @@ class MainActivity : AppCompatActivity(), PermissionListener {
 //            override fun onFailure(call: Call<Answer>, t: Throwable) {
 //                TODO("Not yet implemented")
 //            }
-//
-//        })
+//textResult
         val textoChat = edt_testeEnvio.text.toString()
         val testeAcht : MutableList<String> = ArrayList()
 
         testeAcht.add(textoChat)
 
-        val testeApi = ChatRequest(textoChat)
+        val testeApi = ChatRequest(textResult)
 
         val retrofitChatbot = RetrofitChatbot.apiConnection().postChat(keyChatBotApi, testeApi)
 
@@ -171,8 +173,9 @@ class MainActivity : AppCompatActivity(), PermissionListener {
             ) {
 
                 response.body()?.answers?.forEach {
-                    txt_teste.text = it.answer
-
+                    Log.d("teste", ""+it.answer)
+                    recyclerview_chat.layoutManager = LinearLayoutManager(applicationContext)
+                    recyclerview_chat.adapter = RecyclerViewAdapterChat(it.answer)
                 }
             }
 
