@@ -131,11 +131,6 @@ class MainActivity : AppCompatActivity(), PermissionListener {
         val repository = ChatRepository(application)
         val retrofitChatbot = RetrofitChatbot.apiConnection().postChat(keyChatBotApi, testeApi)
 
-        val chat = EntityChat(receiverMsg = textResult, number_receiver = 1, number_send = null,sendMsg = null)
-        repository.insetChat(chat)
-
-        Log.d("teste",chat.toString())
-
 
 //        var sendchat: List<EntityChat>? = null
 ////        Thread(Runnable {
@@ -147,11 +142,7 @@ class MainActivity : AppCompatActivity(), PermissionListener {
 ////            txt_speechText.text = it.sendMsg
 ////        }
 
-        recyclerview_chat.layoutManager = LinearLayoutManager(applicationContext)
-        repository.getChat()?.observe(this, androidx.lifecycle.Observer {
-            Log.i("teste", it.toString())
-            recyclerview_chat.adapter = RecyclerViewAdapterChat(it)
-        })
+
         retrofitChatbot.enqueue(object: Callback<AnswerResponse> {
             override fun onResponse(
                 call: Call<AnswerResponse>,
@@ -160,6 +151,8 @@ class MainActivity : AppCompatActivity(), PermissionListener {
 
 
                 response.body()?.answers?.forEach {
+                    val chat = EntityChat(receiverMsg = it.answer, number_receiver = 1, number_send = 0,sendMsg = textResult)
+                    repository.insetChat(chat)
 //                    recyclerview_chat.layoutManager = LinearLayoutManager(applicationContext)
 //                    recyclerview_chat.adapter = RecyclerViewAdapterChat(it.answer)
                 }
@@ -170,5 +163,10 @@ class MainActivity : AppCompatActivity(), PermissionListener {
             }
         })
 
+        recyclerview_chat.layoutManager = LinearLayoutManager(applicationContext)
+        repository.getChat()?.observe(this, androidx.lifecycle.Observer {
+            Log.i("teste", it.toString())
+            recyclerview_chat.adapter = RecyclerViewAdapterChat(it)
+        })
     }
 }
