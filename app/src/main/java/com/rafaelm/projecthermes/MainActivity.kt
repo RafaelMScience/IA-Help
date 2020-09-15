@@ -21,9 +21,11 @@ import com.rafaelm.projecthermes.data.api.RetrofitChatbot
 import com.rafaelm.projecthermes.data.dao.Constants.Companion.RQ_SPEECH_REC
 import com.rafaelm.projecthermes.data.dao.Constants.Companion.key
 import com.rafaelm.projecthermes.data.dao.Constants.Companion.keyChatBotApi
+import com.rafaelm.projecthermes.data.entity.EntityChat
 import com.rafaelm.projecthermes.data.model.chatbot.AnswerResponse
 import com.rafaelm.projecthermes.data.model.chatbot.ChatRequest
 import com.rafaelm.projecthermes.data.model.luis.ModelAzure
+import com.rafaelm.projecthermes.data.repository.ChatRepository
 import com.rafaelm.projecthermes.view.adapter.RecyclerViewAdapterChat
 import kotlinx.android.synthetic.main.activity_main.*
 import retrofit2.Call
@@ -32,6 +34,8 @@ import retrofit2.Response
 import java.util.*
 
 class MainActivity : AppCompatActivity(), PermissionListener {
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -121,61 +125,43 @@ class MainActivity : AppCompatActivity(), PermissionListener {
 
     private fun chatbot(textResult: String) {
 
-//        val textoChat = edt_testeEnvio.text.toString()
-//        val testeAcht : Answer = Answer()
-//
-//        testeAcht.questions = listOf("oi")
-//
-//        val testeApi = ChatBot(true, listOf(testeAcht))
-//
-//        val retrofitChatbot = RetrofitChatbot.apiConnection().postChat("", listOf("oi"))
-
-//        val textoChat = edt_testeEnvio.text.toString()
-//        val testeAcht : MutableList<String> = ArrayList()
-//
-//        testeAcht.add(textoChat)
-////        val testeApi = Answer(questions = testeAcht)
-//        val testeApi = Answer(question = textoChat)
-
-
-//        val retrofitChatbot = RetrofitChatbot.apiConnection().postChat("", testeApi)
-
-//        val testeApi = ChatRequest(textoChat)
-//
-//        val retrofitChatbot = RetrofitChatbot.apiConnection().postChat("", testeApi)
-//
-//        retrofitChatbot.enqueue(object : Callback<Answer>{
-//            override fun onResponse(call: Call<Answer>, response: Response<Answer>) {
-//                txt_teste.text = response.body()?.answer.toString()
-//                Log.d("teste",""+response.body()?.toString())
-//                Log.d("teste",""+response.body())
-//                Log.d("teste",""+response.message().toString())
-//                Log.d("teste",""+response.code().toString())
-//            }
-//
-//            override fun onFailure(call: Call<Answer>, t: Throwable) {
-//                TODO("Not yet implemented")
-//            }
-//textResult
-        val textoChat = edt_testeEnvio.text.toString()
-        val testeAcht : MutableList<String> = ArrayList()
-
-        testeAcht.add(textoChat)
-
         val testeApi = ChatRequest(textResult)
 
+
+        val repository = ChatRepository(application)
         val retrofitChatbot = RetrofitChatbot.apiConnection().postChat(keyChatBotApi, testeApi)
 
+        val chat = EntityChat(receiverMsg = textResult, number_receiver = 1, number_send = null,sendMsg = null)
+        repository.insetChat(chat)
+
+        Log.d("teste",chat.toString())
+
+
+//        var sendchat: List<EntityChat>? = null
+////        Thread(Runnable {
+////            sendchat = repository.getChat()
+////        }).start()
+////
+////
+////        sendchat?.forEach{
+////            txt_speechText.text = it.sendMsg
+////        }
+
+        recyclerview_chat.layoutManager = LinearLayoutManager(applicationContext)
+        repository.getChat()?.observe(this, androidx.lifecycle.Observer {
+            Log.i("teste", it.toString())
+            recyclerview_chat.adapter = RecyclerViewAdapterChat(it)
+        })
         retrofitChatbot.enqueue(object: Callback<AnswerResponse> {
             override fun onResponse(
                 call: Call<AnswerResponse>,
                 response: Response<AnswerResponse>
             ) {
 
+
                 response.body()?.answers?.forEach {
-                    Log.d("teste", ""+it.answer)
-                    recyclerview_chat.layoutManager = LinearLayoutManager(applicationContext)
-                    recyclerview_chat.adapter = RecyclerViewAdapterChat(it.answer)
+//                    recyclerview_chat.layoutManager = LinearLayoutManager(applicationContext)
+//                    recyclerview_chat.adapter = RecyclerViewAdapterChat(it.answer)
                 }
             }
 

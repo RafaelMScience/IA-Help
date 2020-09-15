@@ -5,10 +5,11 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.rafaelm.projecthermes.R
+import com.rafaelm.projecthermes.data.entity.EntityChat
 import kotlinx.android.synthetic.main.chat_left.view.*
 
 
-class RecyclerViewAdapterChat(val answer: String) : RecyclerView.Adapter<RecyclerViewAdapterChat.ViewHolder>(){
+class RecyclerViewAdapterChat(private val answer: List<EntityChat>) : RecyclerView.Adapter<RecyclerViewAdapterChat.ViewHolder>(){
 
     override fun onCreateViewHolder(
         parent: ViewGroup,
@@ -24,11 +25,12 @@ class RecyclerViewAdapterChat(val answer: String) : RecyclerView.Adapter<Recycle
     }
 
     override fun getItemCount(): Int {
-        return 1
+        return answer.size
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.itemView.txt_chatLeft.text = answer
+        val answernu = answer[position]
+        holder.itemView.txt_chatLeft.text = answernu.receiverMsg
     }
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view)
