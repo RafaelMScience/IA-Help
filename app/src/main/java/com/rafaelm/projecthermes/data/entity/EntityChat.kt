@@ -16,9 +16,7 @@ data class EntityChat(
     @ColumnInfo(name = "receiver_msg")
     var receiverMsg: String?,
 
-    @ColumnInfo(name = "number_send")
-    var number_send: Int?,
 
-    @ColumnInfo(name = "number_receiver")
-    var number_receiver: Int?,
+    @ColumnInfo(name = "number_id")
+    var numberId: Int?,
 )

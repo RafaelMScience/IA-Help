@@ -48,9 +48,6 @@ class MainActivity : AppCompatActivity(), PermissionListener {
                 .check()
         }
 
-        btn_chat.setOnClickListener {
-//            chatbot(textResult)
-        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -96,8 +93,6 @@ class MainActivity : AppCompatActivity(), PermissionListener {
         retrofitClient.enqueue(object : Callback<ModelAzure> {
             override fun onResponse(call: Call<ModelAzure>, response: Response<ModelAzure>) {
 
-                txt_speechText.text = response.body()?.prediction?.topIntent.toString()
-
             }
 
             override fun onFailure(call: Call<ModelAzure>, t: Throwable) {
@@ -131,17 +126,8 @@ class MainActivity : AppCompatActivity(), PermissionListener {
         val repository = ChatRepository(application)
         val retrofitChatbot = RetrofitChatbot.apiConnection().postChat(keyChatBotApi, testeApi)
 
-
-//        var sendchat: List<EntityChat>? = null
-////        Thread(Runnable {
-////            sendchat = repository.getChat()
-////        }).start()
-////
-////
-////        sendchat?.forEach{
-////            txt_speechText.text = it.sendMsg
-////        }
-
+        val chatSend = EntityChat(receiverMsg = null, numberId = 0,sendMsg = textResult)
+        repository.insetChat(chatSend)
 
         retrofitChatbot.enqueue(object: Callback<AnswerResponse> {
             override fun onResponse(
@@ -151,8 +137,8 @@ class MainActivity : AppCompatActivity(), PermissionListener {
 
 
                 response.body()?.answers?.forEach {
-                    val chat = EntityChat(receiverMsg = it.answer, number_receiver = 1, number_send = 0,sendMsg = textResult)
-                    repository.insetChat(chat)
+                    val chatReceiver = EntityChat(receiverMsg = it.answer, numberId = 1,sendMsg = null)
+                    repository.insetChat(chatReceiver)
 //                    recyclerview_chat.layoutManager = LinearLayoutManager(applicationContext)
 //                    recyclerview_chat.adapter = RecyclerViewAdapterChat(it.answer)
                 }

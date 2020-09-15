@@ -7,33 +7,61 @@ import androidx.recyclerview.widget.RecyclerView
 import com.rafaelm.projecthermes.R
 import com.rafaelm.projecthermes.data.entity.EntityChat
 import kotlinx.android.synthetic.main.chat_left.view.*
+import kotlinx.android.synthetic.main.chat_right.view.*
 
+private const val SEND_MSG = 0
+private const val RECEIVER_MSG = 1
 
-class RecyclerViewAdapterChat(private val answer: List<EntityChat>) : RecyclerView.Adapter<RecyclerViewAdapterChat.ViewHolder>(){
+class RecyclerViewAdapterChat(private val chat: List<EntityChat>) :
+    RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int
-    ): ViewHolder {
-        return ViewHolder(
-            LayoutInflater.from(parent.context).inflate(
-                R.layout.chat_left,
-                parent,
-                false
-            )
-        )
+    ): RecyclerView.ViewHolder {
+        if (viewType == SEND_MSG) {
+            val view =
+                LayoutInflater.from(parent.context).inflate(R.layout.chat_right, parent, false)
+            return ViewHolderSend(view)
+        }else{
+            val view =
+                LayoutInflater.from(parent.context).inflate(R.layout.chat_left, parent, false)
+            return ViewHolderReceiver(view)
+        }
     }
 
     override fun getItemCount(): Int {
-        return answer.size
+        return chat.size
     }
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val answernu = answer[position]
-        holder.itemView.txt_chatLeft.text = answernu.receiverMsg
+    override fun getItemViewType(position: Int): Int {
+        return if (chat[position].numberId == 0) {
+            SEND_MSG
+        } else {
+            RECEIVER_MSG
+        }
     }
 
-    class ViewHolder(view: View) : RecyclerView.ViewHolder(view)
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        if(getItemViewType(position) == SEND_MSG){
+            (holder as ViewHolderSend).bind(chat[position])
+        }else{
+            (holder as ViewHolderReceiver).bind(chat[position])
+        }
+    }
 
+//    class ViewHolder(view: View) : RecyclerView.ViewHolder(view)
+
+    inner class ViewHolderSend(itemview: View) : RecyclerView.ViewHolder(itemview) {
+        fun bind(chatSendModel: EntityChat) {
+            itemView.txt_chatRight.text = chatSendModel.sendMsg
+        }
+    }
+
+    inner class ViewHolderReceiver(itemview: View) : RecyclerView.ViewHolder(itemview) {
+        fun bind(chatReceiverModel: EntityChat) {
+            itemView.txt_chatLeft.text = chatReceiverModel.receiverMsg
+        }
+    }
 
 }
