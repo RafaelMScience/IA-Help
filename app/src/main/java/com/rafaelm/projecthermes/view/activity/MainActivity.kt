@@ -1,4 +1,4 @@
-package com.rafaelm.projecthermes
+package com.rafaelm.projecthermes.view.activity
 
 import android.Manifest
 import android.app.Activity
@@ -16,11 +16,13 @@ import com.karumi.dexter.listener.PermissionDeniedResponse
 import com.karumi.dexter.listener.PermissionGrantedResponse
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.single.PermissionListener
+import com.rafaelm.projecthermes.R
 import com.rafaelm.projecthermes.data.api.RetrofitAzure
 import com.rafaelm.projecthermes.data.api.RetrofitChatbot
 import com.rafaelm.projecthermes.data.dao.Constants.Companion.RQ_SPEECH_REC
-import com.rafaelm.projecthermes.data.dao.Constants.Companion.key
-import com.rafaelm.projecthermes.data.dao.Constants.Companion.keyChatBotApi
+import com.rafaelm.projecthermes.data.dao.Constants.Companion.keyLuis
+import com.rafaelm.projecthermes.data.dao.Constants.Companion.keyChatAuthBotApi
+import com.rafaelm.projecthermes.data.dao.Prefs
 import com.rafaelm.projecthermes.data.entity.EntityChat
 import com.rafaelm.projecthermes.data.model.chatbot.AnswerResponse
 import com.rafaelm.projecthermes.data.model.chatbot.ChatRequest
@@ -35,7 +37,17 @@ import java.util.*
 
 class MainActivity : AppCompatActivity(), PermissionListener {
 
+//    private val sharedPreferences = Prefs(applicationContext)
 
+    override fun onStart() {
+
+        val repository = ChatRepository(application)
+        recyclerview_chat.layoutManager = LinearLayoutManager(applicationContext)
+        repository.getChat()?.observe(this, androidx.lifecycle.Observer {
+            recyclerview_chat.adapter = RecyclerViewAdapterChat(it)
+        })
+        super.onStart()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,6 +60,8 @@ class MainActivity : AppCompatActivity(), PermissionListener {
                 .check()
         }
 
+
+
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -57,7 +71,7 @@ class MainActivity : AppCompatActivity(), PermissionListener {
             val textResult = result?.get(0).toString()
 
             chatbot(textResult)
-//            conectionApi(textResult)
+            conectionApi(textResult)
         }
     }
 
@@ -80,19 +94,21 @@ class MainActivity : AppCompatActivity(), PermissionListener {
 
 
         val data: MutableMap<String, String> = HashMap()
-        data["subscription-key"] = key
+        data["subscription-key"] = keyLuis
         data["verbose"] = true.toString()
         data["show-all-intents"] = true.toString()
         data["log"] = true.toString()
         data["query"] = textResult
 
-//        val textResultModel = ModelAzure(query = textResult,)
-
+        val textResultModel = ModelAzure(query = textResult)
+        val sharedPreferences = Prefs(applicationContext)
         val retrofitClient = RetrofitAzure.apiConnection().postSendText(data)
 
         retrofitClient.enqueue(object : Callback<ModelAzure> {
             override fun onResponse(call: Call<ModelAzure>, response: Response<ModelAzure>) {
+                Log.i("teste", response.body()?.prediction?.topIntent.toString())
 
+                sharedPreferences.save("prediction", response.body()?.prediction?.topIntent.toString())
             }
 
             override fun onFailure(call: Call<ModelAzure>, t: Throwable) {
@@ -120,15 +136,16 @@ class MainActivity : AppCompatActivity(), PermissionListener {
 
     private fun chatbot(textResult: String) {
 
-        val testeApi = ChatRequest(textResult)
+        val chatApi = ChatRequest(textResult)
 
 
         val repository = ChatRepository(application)
-        val retrofitChatbot = RetrofitChatbot.apiConnection().postChat(keyChatBotApi, testeApi)
+        val retrofitChatbot = RetrofitChatbot.apiConnection().postChat(keyChatAuthBotApi, chatApi)
 
-        val chatSend = EntityChat(receiverMsg = null, numberId = 0,sendMsg = textResult)
-        repository.insetChat(chatSend)
+        val chatEntity = EntityChat(receiverMsg = null, numberId = 0,sendMsg = textResult,typeMsg = null)
+        repository.insetChat(chatEntity)
 
+        val sharedPreferences = Prefs(applicationContext)
         retrofitChatbot.enqueue(object: Callback<AnswerResponse> {
             override fun onResponse(
                 call: Call<AnswerResponse>,
@@ -137,7 +154,8 @@ class MainActivity : AppCompatActivity(), PermissionListener {
 
 
                 response.body()?.answers?.forEach {
-                    val chatReceiver = EntityChat(receiverMsg = it.answer, numberId = 1,sendMsg = null)
+                    val typeMsg = sharedPreferences.getValueString("prediction")
+                    val chatReceiver = EntityChat(receiverMsg = it.answer, numberId = 1,sendMsg = null,typeMsg = typeMsg)
                     repository.insetChat(chatReceiver)
 //                    recyclerview_chat.layoutManager = LinearLayoutManager(applicationContext)
 //                    recyclerview_chat.adapter = RecyclerViewAdapterChat(it.answer)
@@ -151,7 +169,6 @@ class MainActivity : AppCompatActivity(), PermissionListener {
 
         recyclerview_chat.layoutManager = LinearLayoutManager(applicationContext)
         repository.getChat()?.observe(this, androidx.lifecycle.Observer {
-            Log.i("teste", it.toString())
             recyclerview_chat.adapter = RecyclerViewAdapterChat(it)
         })
     }
