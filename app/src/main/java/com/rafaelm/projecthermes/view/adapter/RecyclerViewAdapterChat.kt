@@ -1,6 +1,5 @@
 package com.rafaelm.projecthermes.view.adapter
 
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -61,7 +60,7 @@ class RecyclerViewAdapterChat(private val chat: List<EntityChat>) :
 
     inner class ViewHolderReceiver(itemview: View) : RecyclerView.ViewHolder(itemview) {
         fun bind(chatReceiverModel: EntityChat) {
-            
+
             if(chatReceiverModel.receiverMsg.equals("No good match found in KB.", ignoreCase = false)){
                 itemView.txt_chatLeft.text = "Desculpa não entendi"
             }else{

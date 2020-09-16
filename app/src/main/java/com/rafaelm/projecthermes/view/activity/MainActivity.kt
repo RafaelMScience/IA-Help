@@ -3,6 +3,7 @@ package com.rafaelm.projecthermes.view.activity
 import android.Manifest
 import android.app.Activity
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
@@ -11,11 +12,10 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.karumi.dexter.Dexter
+import com.karumi.dexter.MultiplePermissionsReport
 import com.karumi.dexter.PermissionToken
-import com.karumi.dexter.listener.PermissionDeniedResponse
-import com.karumi.dexter.listener.PermissionGrantedResponse
 import com.karumi.dexter.listener.PermissionRequest
-import com.karumi.dexter.listener.single.PermissionListener
+import com.karumi.dexter.listener.multi.MultiplePermissionsListener
 import com.rafaelm.projecthermes.R
 import com.rafaelm.projecthermes.data.api.RetrofitAzure
 import com.rafaelm.projecthermes.data.api.RetrofitChatbot
@@ -35,9 +35,8 @@ import retrofit2.Callback
 import retrofit2.Response
 import java.util.*
 
-class MainActivity : AppCompatActivity(), PermissionListener {
+class MainActivity : AppCompatActivity(), MultiplePermissionsListener {
 
-//    private val sharedPreferences = Prefs(applicationContext)
 
     override fun onStart() {
 
@@ -55,12 +54,10 @@ class MainActivity : AppCompatActivity(), PermissionListener {
 
         btn_speech.setOnClickListener {
             Dexter.withContext(this)
-                .withPermission(Manifest.permission.RECORD_AUDIO)
+                .withPermissions(Manifest.permission.RECORD_AUDIO,Manifest.permission.CALL_PHONE)
                 .withListener(this)
                 .check()
         }
-
-
 
     }
 
@@ -92,7 +89,6 @@ class MainActivity : AppCompatActivity(), PermissionListener {
 
     private fun conectionApi(textResult: String) {
 
-
         val data: MutableMap<String, String> = HashMap()
         data["subscription-key"] = keyLuis
         data["verbose"] = true.toString()
@@ -100,15 +96,27 @@ class MainActivity : AppCompatActivity(), PermissionListener {
         data["log"] = true.toString()
         data["query"] = textResult
 
-        val textResultModel = ModelAzure(query = textResult)
         val sharedPreferences = Prefs(applicationContext)
         val retrofitClient = RetrofitAzure.apiConnection().postSendText(data)
 
         retrofitClient.enqueue(object : Callback<ModelAzure> {
             override fun onResponse(call: Call<ModelAzure>, response: Response<ModelAzure>) {
-                Log.i("teste", response.body()?.prediction?.topIntent.toString())
+                val type = response.body()?.prediction?.topIntent.toString()
 
                 sharedPreferences.save("prediction", response.body()?.prediction?.topIntent.toString())
+
+                val emergency = "111"
+
+                if (type.equals("Saude emergência", ignoreCase = true)){
+                    val i = Intent(Intent.ACTION_CALL)
+                    i.data = Uri.parse("tel: $emergency")
+                    startActivity(i)
+                }else if (type.equals("Saude urgencia", ignoreCase = true)){
+                    val i = Intent(Intent.ACTION_CALL)
+                    i.data= Uri.parse("tel: $emergency")
+                    startActivity(i)
+                }
+
             }
 
             override fun onFailure(call: Call<ModelAzure>, t: Throwable) {
@@ -116,22 +124,6 @@ class MainActivity : AppCompatActivity(), PermissionListener {
             }
 
         })
-    }
-
-    override fun onPermissionGranted(p0: PermissionGrantedResponse?) {
-        askSpeechInput()
-    }
-
-    override fun onPermissionDenied(p0: PermissionDeniedResponse?) {
-        //se negar fica nessa tela pedindo permissao
-        Toast.makeText(this,"Permissao para falar negada", Toast.LENGTH_SHORT).show()
-    }
-
-    override fun onPermissionRationaleShouldBeShown(
-        permission: PermissionRequest?,
-        token: PermissionToken?
-    ) {
-        token!!.continuePermissionRequest()
     }
 
     private fun chatbot(textResult: String) {
@@ -152,7 +144,6 @@ class MainActivity : AppCompatActivity(), PermissionListener {
                 response: Response<AnswerResponse>
             ) {
 
-
                 response.body()?.answers?.forEach {
                     val typeMsg = sharedPreferences.getValueString("prediction")
                     val chatReceiver = EntityChat(receiverMsg = it.answer, numberId = 1,sendMsg = null,typeMsg = typeMsg)
@@ -171,5 +162,17 @@ class MainActivity : AppCompatActivity(), PermissionListener {
         repository.getChat()?.observe(this, androidx.lifecycle.Observer {
             recyclerview_chat.adapter = RecyclerViewAdapterChat(it)
         })
+    }
+
+    override fun onPermissionsChecked(permission: MultiplePermissionsReport?) {
+        askSpeechInput()
+
+    }
+
+    override fun onPermissionRationaleShouldBeShown(
+        permissionReq: MutableList<PermissionRequest>?,
+        permissionToken: PermissionToken?
+    ) {
+        permissionToken?.continuePermissionRequest()
     }
 }
