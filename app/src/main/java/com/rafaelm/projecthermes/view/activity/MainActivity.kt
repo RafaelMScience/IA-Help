@@ -71,10 +71,20 @@ class MainActivity : AppCompatActivity(), MultiplePermissionsListener {
         edt_msg.addTextChangedListener {
             if (it?.length == 0) {
                 btn_speech.text = "Falar"
+                val icMicDrawable = getDrawable(R.drawable.ic_mic)
+                val h: Int = icMicDrawable!!.intrinsicHeight
+                val w: Int = icMicDrawable.intrinsicWidth
+                icMicDrawable.setBounds(0, 0, w, h)
+                btn_speech.setCompoundDrawables(null, null, icMicDrawable, null)
                 btn_speech.setOnClickListener {
                     askSpeechInput()
                 }
             } else {
+                val icSendDrawable = getDrawable(R.drawable.ic_send)
+                val h: Int = icSendDrawable!!.intrinsicHeight
+                val w: Int = icSendDrawable.intrinsicWidth
+                icSendDrawable.setBounds(0, 0, w, h)
+                btn_speech.setCompoundDrawables(null, null, icSendDrawable, null)
                 btn_speech.text = "Enviar"
                 btn_speech.setOnClickListener {
                     chatbot(edt_msg.text.toString())
