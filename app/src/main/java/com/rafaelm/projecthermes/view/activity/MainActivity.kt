@@ -10,6 +10,7 @@ import android.speech.SpeechRecognizer
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.MultiplePermissionsReport
@@ -50,6 +51,7 @@ class MainActivity : AppCompatActivity(), MultiplePermissionsListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         setContentView(R.layout.activity_main)
 
         btn_speech.setOnClickListener {
@@ -106,6 +108,7 @@ class MainActivity : AppCompatActivity(), MultiplePermissionsListener {
                 sharedPreferences.save("prediction", response.body()?.prediction?.topIntent.toString())
 
                 val emergency = "111"
+                val policy = "222"
 
                 if (type.equals("Saude emergência", ignoreCase = true)){
                     val i = Intent(Intent.ACTION_CALL)
@@ -114,6 +117,10 @@ class MainActivity : AppCompatActivity(), MultiplePermissionsListener {
                 }else if (type.equals("Saude urgencia", ignoreCase = true)){
                     val i = Intent(Intent.ACTION_CALL)
                     i.data= Uri.parse("tel: $emergency")
+                    startActivity(i)
+                }else if(type.equals("Casos de policia", ignoreCase = true)){
+                    val i = Intent(Intent.ACTION_CALL)
+                    i.data= Uri.parse("tel: $policy")
                     startActivity(i)
                 }
 
