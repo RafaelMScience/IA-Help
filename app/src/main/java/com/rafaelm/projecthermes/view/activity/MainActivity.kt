@@ -11,6 +11,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.MultiplePermissionsReport
@@ -21,8 +22,8 @@ import com.rafaelm.projecthermes.R
 import com.rafaelm.projecthermes.data.api.RetrofitAzure
 import com.rafaelm.projecthermes.data.api.RetrofitChatbot
 import com.rafaelm.projecthermes.data.dao.Constants.Companion.RQ_SPEECH_REC
-import com.rafaelm.projecthermes.data.dao.Constants.Companion.keyLuis
 import com.rafaelm.projecthermes.data.dao.Constants.Companion.keyChatAuthBotApi
+import com.rafaelm.projecthermes.data.dao.Constants.Companion.keyLuis
 import com.rafaelm.projecthermes.data.dao.Prefs
 import com.rafaelm.projecthermes.data.entity.EntityChat
 import com.rafaelm.projecthermes.data.model.chatbot.AnswerResponse
@@ -54,14 +55,36 @@ class MainActivity : AppCompatActivity(), MultiplePermissionsListener {
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         setContentView(R.layout.activity_main)
 
-        btn_speech.setOnClickListener {
-            Dexter.withContext(this)
-                .withPermissions(Manifest.permission.RECORD_AUDIO,Manifest.permission.CALL_PHONE)
-                .withListener(this)
-                .check()
-        }
+        Dexter.withContext(this)
+            .withPermissions(
+                Manifest.permission.RECORD_AUDIO,
+                Manifest.permission.CALL_PHONE
+            )
+            .withListener(this)
+            .check()
+
+        clickButtonSend()
 
     }
+
+    private fun clickButtonSend() {
+        edt_msg.addTextChangedListener {
+            if (it?.length == 0) {
+                btn_speech.text = "Falar"
+                btn_speech.setOnClickListener {
+                    askSpeechInput()
+                }
+            } else {
+                btn_speech.text = "Enviar"
+                btn_speech.setOnClickListener {
+                    chatbot(edt_msg.text.toString())
+                    conectionApi(edt_msg.text.toString())
+                    edt_msg.text.clear()
+                }
+            }
+        }
+    }
+
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -105,23 +128,40 @@ class MainActivity : AppCompatActivity(), MultiplePermissionsListener {
             override fun onResponse(call: Call<ModelAzure>, response: Response<ModelAzure>) {
                 val type = response.body()?.prediction?.topIntent.toString()
 
-                sharedPreferences.save("prediction", response.body()?.prediction?.topIntent.toString())
+                sharedPreferences.save(
+                    "prediction",
+                    response.body()?.prediction?.topIntent.toString()
+                )
 
                 val emergency = "111"
                 val policy = "222"
 
-                if (type.equals("Saude emergência", ignoreCase = true)){
-                    val i = Intent(Intent.ACTION_CALL)
-                    i.data = Uri.parse("tel: $emergency")
-                    startActivity(i)
-                }else if (type.equals("Saude urgencia", ignoreCase = true)){
-                    val i = Intent(Intent.ACTION_CALL)
-                    i.data= Uri.parse("tel: $emergency")
-                    startActivity(i)
-                }else if(type.equals("Casos de policia", ignoreCase = true)){
-                    val i = Intent(Intent.ACTION_CALL)
-                    i.data= Uri.parse("tel: $policy")
-                    startActivity(i)
+                Dexter.withContext(this@MainActivity)
+                    .withPermissions(
+                        Manifest.permission.RECORD_AUDIO,
+                        Manifest.permission.CALL_PHONE
+                    )
+                    .withListener(this@MainActivity)
+                    .check()
+
+                Log.i("teste", type.toString())
+
+                when {
+                    type.equals("Saude emergência", ignoreCase = true) -> {
+                        val i = Intent(Intent.ACTION_CALL)
+                        i.data = Uri.parse("tel: $emergency")
+                        startActivity(i)
+                    }
+                    type.equals("Saude urgencia", ignoreCase = true) -> {
+                        val i = Intent(Intent.ACTION_CALL)
+                        i.data = Uri.parse("tel: $emergency")
+                        startActivity(i)
+                    }
+                    type.equals("Casos de policia", ignoreCase = true) -> {
+                        val i = Intent(Intent.ACTION_CALL)
+                        i.data = Uri.parse("tel: $policy")
+                        startActivity(i)
+                    }
                 }
 
             }
@@ -141,11 +181,12 @@ class MainActivity : AppCompatActivity(), MultiplePermissionsListener {
         val repository = ChatRepository(application)
         val retrofitChatbot = RetrofitChatbot.apiConnection().postChat(keyChatAuthBotApi, chatApi)
 
-        val chatEntity = EntityChat(receiverMsg = null, numberId = 0,sendMsg = textResult,typeMsg = null)
+        val chatEntity =
+            EntityChat(receiverMsg = null, numberId = 0, sendMsg = textResult, typeMsg = null)
         repository.insetChat(chatEntity)
 
         val sharedPreferences = Prefs(applicationContext)
-        retrofitChatbot.enqueue(object: Callback<AnswerResponse> {
+        retrofitChatbot.enqueue(object : Callback<AnswerResponse> {
             override fun onResponse(
                 call: Call<AnswerResponse>,
                 response: Response<AnswerResponse>
@@ -153,7 +194,12 @@ class MainActivity : AppCompatActivity(), MultiplePermissionsListener {
 
                 response.body()?.answers?.forEach {
                     val typeMsg = sharedPreferences.getValueString("prediction")
-                    val chatReceiver = EntityChat(receiverMsg = it.answer, numberId = 1,sendMsg = null,typeMsg = typeMsg)
+                    val chatReceiver = EntityChat(
+                        receiverMsg = it.answer,
+                        numberId = 1,
+                        sendMsg = null,
+                        typeMsg = typeMsg
+                    )
                     repository.insetChat(chatReceiver)
 //                    recyclerview_chat.layoutManager = LinearLayoutManager(applicationContext)
 //                    recyclerview_chat.adapter = RecyclerViewAdapterChat(it.answer)
@@ -172,7 +218,7 @@ class MainActivity : AppCompatActivity(), MultiplePermissionsListener {
     }
 
     override fun onPermissionsChecked(permission: MultiplePermissionsReport?) {
-        askSpeechInput()
+        clickButtonSend()
 
     }
 
