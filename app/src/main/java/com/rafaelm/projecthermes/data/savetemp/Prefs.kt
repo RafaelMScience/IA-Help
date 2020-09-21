@@ -1,4 +1,4 @@
-package com.rafaelm.projecthermes.data.dao
+package com.rafaelm.projecthermes.data.savetemp
 
 import android.content.Context
 import android.content.SharedPreferences

@@ -7,10 +7,15 @@ import android.net.Uri
 import android.os.Bundle
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
+import android.speech.tts.TextToSpeech
 import android.util.Log
+import android.view.*
+import android.widget.LinearLayout
+import android.widget.RadioGroup
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.appcompat.widget.Toolbar
 import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.karumi.dexter.Dexter
@@ -21,15 +26,15 @@ import com.karumi.dexter.listener.multi.MultiplePermissionsListener
 import com.rafaelm.projecthermes.R
 import com.rafaelm.projecthermes.data.api.RetrofitAzure
 import com.rafaelm.projecthermes.data.api.RetrofitChatbot
-import com.rafaelm.projecthermes.data.dao.Constants.Companion.RQ_SPEECH_REC
-import com.rafaelm.projecthermes.data.dao.Constants.Companion.keyChatAuthBotApi
-import com.rafaelm.projecthermes.data.dao.Constants.Companion.keyLuis
-import com.rafaelm.projecthermes.data.dao.Prefs
 import com.rafaelm.projecthermes.data.entity.EntityChat
 import com.rafaelm.projecthermes.data.model.chatbot.AnswerResponse
 import com.rafaelm.projecthermes.data.model.chatbot.ChatRequest
 import com.rafaelm.projecthermes.data.model.luis.ModelAzure
 import com.rafaelm.projecthermes.data.repository.ChatRepository
+import com.rafaelm.projecthermes.data.savetemp.Constants.Companion.RQ_SPEECH_REC
+import com.rafaelm.projecthermes.data.savetemp.Constants.Companion.keyChatAuthBotApi
+import com.rafaelm.projecthermes.data.savetemp.Constants.Companion.keyLuis
+import com.rafaelm.projecthermes.data.savetemp.Prefs
 import com.rafaelm.projecthermes.view.adapter.RecyclerViewAdapterChat
 import kotlinx.android.synthetic.main.activity_main.*
 import retrofit2.Call
@@ -39,6 +44,8 @@ import java.util.*
 
 class MainActivity : AppCompatActivity(), MultiplePermissionsListener {
 
+    private lateinit var mTTs: TextToSpeech
+    private var audioMenu = true
 
     override fun onStart() {
 
@@ -47,6 +54,17 @@ class MainActivity : AppCompatActivity(), MultiplePermissionsListener {
         repository.getChat()?.observe(this, androidx.lifecycle.Observer {
             recyclerview_chat.adapter = RecyclerViewAdapterChat(it)
         })
+
+        btn_speech.text = "Falar"
+        val icMicDrawable = getDrawable(R.drawable.ic_mic)
+        val h: Int = icMicDrawable!!.intrinsicHeight
+        val w: Int = icMicDrawable.intrinsicWidth
+        icMicDrawable.setBounds(0, 0, w, h)
+        btn_speech.setCompoundDrawables(null, null, icMicDrawable, null)
+        btn_speech.setOnClickListener {
+            askSpeechInput()
+        }
+
         super.onStart()
     }
 
@@ -54,6 +72,9 @@ class MainActivity : AppCompatActivity(), MultiplePermissionsListener {
         super.onCreate(savedInstanceState)
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         setContentView(R.layout.activity_main)
+
+        setSupportActionBar(toolbar_main as Toolbar?)
+        supportActionBar?.title = "IA CHAT DE AJUDA"
 
         Dexter.withContext(this)
             .withPermissions(
@@ -65,6 +86,57 @@ class MainActivity : AppCompatActivity(), MultiplePermissionsListener {
 
         clickButtonSend()
 
+        mTTs = TextToSpeech(this) { status ->
+            if (status != TextToSpeech.ERROR) {
+                mTTs.language = Locale.ROOT
+            }
+        }
+
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        val inflater: MenuInflater = menuInflater
+        inflater.inflate(R.menu.menu, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        // Handle item selection
+
+        return when (item.itemId) {
+            R.id.menu_audio -> {
+                val sharedPreferences = Prefs(applicationContext)
+
+                if (audioMenu) {
+                    audioMenu = false
+                    sharedPreferences.save("audio_menu", audioMenu)
+                    Toast.makeText(this, "Audio Desativado", Toast.LENGTH_SHORT).show()
+                    item.icon = getDrawable(R.drawable.ic_volume_off)
+                    edt_msg.visibility = View.VISIBLE
+                    btn_speech.visibility = View.VISIBLE
+
+                    card_speak.visibility = View.GONE
+
+                } else {
+                    audioMenu = true
+                    sharedPreferences.save("audio_menu", audioMenu)
+                    Toast.makeText(this, "Audio Ativado", Toast.LENGTH_SHORT).show()
+                    item.icon = getDrawable(R.drawable.ic_hearing)
+                    edt_msg.visibility = View.GONE
+                    btn_speech.visibility = View.GONE
+
+                    card_speak.visibility = View.VISIBLE
+
+                    card_speak.setOnClickListener {
+                        askSpeechInput()
+                    }
+
+                }
+                return !audioMenu
+            }
+
+            else -> super.onOptionsItemSelected(item)
+        }
     }
 
     private fun clickButtonSend() {
@@ -211,8 +283,11 @@ class MainActivity : AppCompatActivity(), MultiplePermissionsListener {
                         typeMsg = typeMsg
                     )
                     repository.insetChat(chatReceiver)
-//                    recyclerview_chat.layoutManager = LinearLayoutManager(applicationContext)
-//                    recyclerview_chat.adapter = RecyclerViewAdapterChat(it.answer)
+
+                    val audioBool = sharedPreferences.getValueBoolien("audio_menu", false)
+                    if (audioBool) {
+                        mTTs.speak(it.answer, TextToSpeech.QUEUE_FLUSH, null)
+                    }
                 }
             }
 

@@ -5,12 +5,11 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.rafaelm.projecthermes.R
+import com.rafaelm.projecthermes.data.savetemp.Constants.Companion.RECEIVER_MSG
+import com.rafaelm.projecthermes.data.savetemp.Constants.Companion.SEND_MSG
 import com.rafaelm.projecthermes.data.entity.EntityChat
 import kotlinx.android.synthetic.main.chat_left.view.*
 import kotlinx.android.synthetic.main.chat_right.view.*
-
-private const val SEND_MSG = 0
-private const val RECEIVER_MSG = 1
 
 class RecyclerViewAdapterChat(private val chat: List<EntityChat>) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {

@@ -1,6 +1,6 @@
 package com.rafaelm.projecthermes.data.api
 
-import com.rafaelm.projecthermes.data.dao.Constants.Companion.keyLuisApi
+import com.rafaelm.projecthermes.data.savetemp.Constants.Companion.keyLuisApi
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 

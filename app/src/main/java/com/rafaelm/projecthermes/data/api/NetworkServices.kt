@@ -1,6 +1,6 @@
 package com.rafaelm.projecthermes.data.api
 
-import com.rafaelm.projecthermes.data.dao.Constants.Companion.keyPostChatApi
+import com.rafaelm.projecthermes.data.savetemp.Constants.Companion.keyPostChatApi
 import com.rafaelm.projecthermes.data.model.chatbot.AnswerResponse
 import com.rafaelm.projecthermes.data.model.chatbot.ChatRequest
 import com.rafaelm.projecthermes.data.model.luis.ModelAzure
