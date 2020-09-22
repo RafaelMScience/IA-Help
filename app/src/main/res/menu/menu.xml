@@ -3,7 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/menu_audio"
-        android:icon="@drawable/ic_hearing"
+        android:icon="@drawable/ic_volume_off"
         android:title="Ouvir"
         app:showAsAction="ifRoom" />
 

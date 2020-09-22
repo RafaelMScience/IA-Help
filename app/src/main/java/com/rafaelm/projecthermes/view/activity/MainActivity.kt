@@ -9,6 +9,7 @@ import android.hardware.Sensor
 import android.hardware.SensorManager
 import android.location.*
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
@@ -19,9 +20,11 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.Toolbar
+import androidx.core.content.ContextCompat
 import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.karumi.dexter.Dexter
@@ -88,6 +91,9 @@ class MainActivity : AppCompatActivity(), MultiplePermissionsListener, LocationL
 
         setSupportActionBar(toolbar_main as Toolbar?)
         supportActionBar?.title = "IA CHAT DE AJUDA"
+
+        //mudar cor status
+        window.statusBarColor = ContextCompat.getColor(this, R.color.colorPrimaryDark)
 
         Dexter.withContext(this)
             .withPermissions(
@@ -157,7 +163,7 @@ class MainActivity : AppCompatActivity(), MultiplePermissionsListener, LocationL
             sharingIntent.type = "text/plain"
             val phone = "5592991211156"
 
-            val shareSub = "$address\nMapa: $uri"
+            val shareSub = "Socorro preciso de ajuda estou na:\n$address\nMapa: $uri"
             val url =
                 "https://api.whatsapp.com/send?phone=$phone&text=" + URLEncoder.encode(
                     shareSub,
