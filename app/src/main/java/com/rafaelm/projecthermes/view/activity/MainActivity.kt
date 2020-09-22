@@ -1,17 +1,23 @@
 package com.rafaelm.projecthermes.view.activity
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.hardware.Sensor
+import android.hardware.SensorManager
+import android.location.*
 import android.net.Uri
 import android.os.Bundle
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import android.speech.tts.TextToSpeech
 import android.util.Log
-import android.view.*
-import android.widget.LinearLayout
-import android.widget.RadioGroup
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
@@ -35,17 +41,24 @@ import com.rafaelm.projecthermes.data.savetemp.Constants.Companion.RQ_SPEECH_REC
 import com.rafaelm.projecthermes.data.savetemp.Constants.Companion.keyChatAuthBotApi
 import com.rafaelm.projecthermes.data.savetemp.Constants.Companion.keyLuis
 import com.rafaelm.projecthermes.data.savetemp.Prefs
+import com.rafaelm.projecthermes.functions.ShakeDetector
 import com.rafaelm.projecthermes.view.adapter.RecyclerViewAdapterChat
 import kotlinx.android.synthetic.main.activity_main.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.net.URLEncoder
 import java.util.*
 
-class MainActivity : AppCompatActivity(), MultiplePermissionsListener {
+class MainActivity : AppCompatActivity(), MultiplePermissionsListener, LocationListener {
 
     private lateinit var mTTs: TextToSpeech
     private var audioMenu = true
+
+
+    private var mSensorManager: SensorManager? = null
+    private var mAccelerometer: Sensor? = null
+    private var mShakeDetector: ShakeDetector? = null
 
     override fun onStart() {
 
@@ -79,12 +92,27 @@ class MainActivity : AppCompatActivity(), MultiplePermissionsListener {
         Dexter.withContext(this)
             .withPermissions(
                 Manifest.permission.RECORD_AUDIO,
-                Manifest.permission.CALL_PHONE
-            )
+                Manifest.permission.CALL_PHONE,
+                Manifest.permission.ACCESS_FINE_LOCATION,
+
+                )
             .withListener(this)
             .check()
 
         clickButtonSend()
+
+        mSensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
+        mAccelerometer = mSensorManager!!
+            .getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+        mShakeDetector = ShakeDetector()
+        mShakeDetector!!.setOnShakeListener(object : ShakeDetector.OnShakeListener {
+            override fun onShake(count: Int) {
+
+                getLocation()
+                Toast.makeText(this@MainActivity, "Enviando sua localizacao", Toast.LENGTH_SHORT)
+                    .show()
+            }
+        })
 
         mTTs = TextToSpeech(this) { status ->
             if (status != TextToSpeech.ERROR) {
@@ -94,6 +122,79 @@ class MainActivity : AppCompatActivity(), MultiplePermissionsListener {
 
     }
 
+    @SuppressLint("MissingPermission")
+    private fun getLocation() {
+        try {
+            val locationManager =
+                applicationContext.getSystemService(LOCATION_SERVICE) as LocationManager
+            locationManager.requestLocationUpdates(
+                LocationManager.GPS_PROVIDER,
+                5000,
+                5f,
+                this@MainActivity
+            )
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    override fun onLocationChanged(location: Location) {
+        Toast.makeText(
+            this,
+            "" + location.latitude.toString() + "," + location.longitude.toString(),
+            Toast.LENGTH_SHORT
+        ).show()
+        try {
+            val geocoder = Geocoder(this@MainActivity, Locale.getDefault())
+            val addresses: List<Address> =
+                geocoder.getFromLocation(location.latitude, location.longitude, 1)
+            val address: String = addresses[0].getAddressLine(0)
+            val uri =
+                "http://maps.google.com/maps?daddr=" + location.latitude.toString() + "," + location.longitude.toString()
+
+            val packageManager: PackageManager = packageManager
+            val sharingIntent = Intent(Intent.ACTION_VIEW)
+            sharingIntent.type = "text/plain"
+            val phone = "5592991211156"
+
+            val shareSub = "$address\nMapa: $uri"
+            val url =
+                "https://api.whatsapp.com/send?phone=$phone&text=" + URLEncoder.encode(
+                    shareSub,
+                    "UTF-8"
+                )
+//            sharingIntent.putExtra(
+//                Intent.EXTRA_TEXT, "" + ShareSub.trimIndent()
+//            )
+            sharingIntent.data = Uri.parse(url)
+            sharingIntent.setPackage("com.whatsapp")
+
+            if (sharingIntent.resolveActivity(packageManager) != null) {
+                startActivity(sharingIntent)
+            }
+//            startActivity(Intent.createChooser(sharingIntent, "Share With?"))
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {}
+
+    override fun onResume() {
+        super.onResume()
+
+        mSensorManager!!.registerListener(
+            mShakeDetector,
+            mAccelerometer,
+            SensorManager.SENSOR_DELAY_UI
+        )
+    }
+
+    override fun onPause() {
+        mSensorManager!!.unregisterListener(mShakeDetector)
+        super.onPause()
+    }
+
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         val inflater: MenuInflater = menuInflater
         inflater.inflate(R.menu.menu, menu)
@@ -101,7 +202,6 @@ class MainActivity : AppCompatActivity(), MultiplePermissionsListener {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        // Handle item selection
 
         return when (item.itemId) {
             R.id.menu_audio -> {
