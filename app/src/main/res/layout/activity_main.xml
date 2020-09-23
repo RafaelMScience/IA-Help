@@ -4,11 +4,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#FFF"
+    android:forceDarkAllowed="false"
     android:orientation="vertical">
 
     <include
         layout="@layout/toolbar"
         android:id="@+id/toolbar_main"/>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerview_chat"
         android:layout_width="match_parent"
@@ -63,12 +65,10 @@
 
         <Button
             android:background="@drawable/background_msg_send_button"
-            android:drawable="@drawable/ic_mic"
             android:id="@+id/btn_speech"
             android:layout_gravity="center"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:contentDescription="click" />
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
     </LinearLayout>
 
 </LinearLayout>
