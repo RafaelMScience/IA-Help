@@ -6,6 +6,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.rafaelm.projecthermes.data.dao.DAOChat
 import com.rafaelm.projecthermes.data.entity.EntityChat
+import com.rafaelm.projecthermes.data.entity.EntityUser
 
 @Database(entities = [EntityChat::class], version = 1, exportSchema = false)
 abstract class DatabaseChat:RoomDatabase() {

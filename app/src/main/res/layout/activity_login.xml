@@ -68,6 +68,8 @@
         app:layout_constraintTop_toBottomOf="@+id/textInputLayout3" />
 
     <Button
+        android:elevation="10dp"
+        android:onClick="singIn"
         android:layout_width="150dp"
         android:layout_height="wrap_content"
         android:background="@drawable/background_msg_send_button"
