@@ -4,6 +4,8 @@ import android.app.Application
 import com.rafaelm.projecthermes.data.dao.DAOChat
 import com.rafaelm.projecthermes.data.database.DatabaseChat
 import com.rafaelm.projecthermes.data.entity.EntityChat
+import com.rafaelm.projecthermes.data.entity.EntityUser
+import com.rafaelm.projecthermes.data.model.firebase.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -26,6 +28,18 @@ class ChatRepository (application: Application): CoroutineScope{
     fun insetChat(chat: EntityChat){
         launch {
             insert(chat)
+        }
+    }
+
+    fun insertUser(user: User){
+        launch {
+            insertFunUser(user)
+        }
+    }
+
+    private suspend fun insertFunUser(user: User){
+        withContext(Dispatchers.IO){
+            daoChat?.insertUser(user)
         }
     }
 

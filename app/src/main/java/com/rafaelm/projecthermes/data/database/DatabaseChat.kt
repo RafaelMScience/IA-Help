@@ -7,8 +7,9 @@ import androidx.room.RoomDatabase
 import com.rafaelm.projecthermes.data.dao.DAOChat
 import com.rafaelm.projecthermes.data.entity.EntityChat
 import com.rafaelm.projecthermes.data.entity.EntityUser
+import com.rafaelm.projecthermes.data.model.firebase.User
 
-@Database(entities = [EntityChat::class], version = 1, exportSchema = false)
+@Database(entities = [EntityChat::class, User::class], version = 1, exportSchema = false)
 abstract class DatabaseChat:RoomDatabase() {
     abstract val databaseChat: DAOChat
 

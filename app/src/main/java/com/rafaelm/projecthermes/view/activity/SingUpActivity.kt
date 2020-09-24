@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.firestore.FirebaseFirestore
 import com.rafaelm.projecthermes.R
 import com.rafaelm.projecthermes.data.model.firebase.User
+import com.rafaelm.projecthermes.data.repository.ChatRepository
 import com.rafaelm.projecthermes.functions.Mask
 import kotlinx.android.synthetic.main.activity_sing_up.*
 import java.util.*
@@ -41,17 +42,18 @@ class SingUpActivity : AppCompatActivity() {
                     number_phone = number,
                     password = password,
                     name = name,
-                    login = login
+                    login = login,
                 )
                 saveDatabaseApi(user)
 
+            }else{
+                Toast.makeText(this,"Preencha todos os campos porfavor", Toast.LENGTH_SHORT).show()
             }
         }
     }
 
     fun saveDatabaseApi(user: User) {
         val db = FirebaseFirestore.getInstance()
-
 
        val docRef = db.collection("users").document(user.email)
 
@@ -90,74 +92,6 @@ class SingUpActivity : AppCompatActivity() {
             }
        }
 
-
-
-
-//        db.collection("users")
-//            .get()
-//            .addOnCompleteListener {
-//                if (it.result!!.isEmpty) {
-//                    db.collection("users").document(user.email)
-//                        .set(user)
-//                        .addOnSuccessListener {
-//                            btn_singup.visibility = View.VISIBLE
-//                            progress_signup.visibility = View.GONE
-//                        }
-//                        .addOnFailureListener {
-//                            Toast.makeText(
-//                                this@SingUpActivity,
-//                                "Verifique sua conexao com a internet",
-//                                Toast.LENGTH_SHORT
-//                            )
-//                                .show()
-//
-//                            btn_singup.visibility = View.VISIBLE
-//                            progress_signup.visibility = View.GONE
-//
-//                        }
-//                } else {
-//                    it.result!!.forEach { document ->
-//                        if (document.id != user.email) {
-//
-//                            db.collection("users").document(user.email)
-//                                .set(user)
-//                                .addOnSuccessListener {
-//                                    btn_singup.visibility = View.VISIBLE
-//                                    progress_signup.visibility = View.GONE
-//                                }
-//                                .addOnFailureListener {
-//                                    Toast.makeText(
-//                                        this@SingUpActivity,
-//                                        "Verifique sua conexao",
-//                                        Toast.LENGTH_SHORT
-//                                    )
-//                                        .show()
-//
-//                                    btn_singup.visibility = View.VISIBLE
-//                                    progress_signup.visibility = View.GONE
-//
-//                                }
-//
-//                        }else{
-//
-//
-//                        }
-//
-//
-//                    }
-//
-//                }
-//            }
-//            .addOnFailureListener {
-//                Toast.makeText(
-//                    this@SingUpActivity,
-//                    "Falhou ao salvar tente novamente",
-//                    Toast.LENGTH_SHORT
-//                ).show()
-//                btn_singup.visibility = View.VISIBLE
-//                progress_signup.visibility = View.GONE
-//
-//            }
     }
 
 }
