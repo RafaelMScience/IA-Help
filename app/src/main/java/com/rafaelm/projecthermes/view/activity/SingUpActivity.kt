@@ -1,6 +1,8 @@
 package com.rafaelm.projecthermes.view.activity
 
 import android.os.Bundle
+import android.util.Log
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.firestore.FirebaseFirestore
@@ -9,7 +11,6 @@ import com.rafaelm.projecthermes.data.model.firebase.User
 import com.rafaelm.projecthermes.functions.Mask
 import kotlinx.android.synthetic.main.activity_sing_up.*
 import java.util.*
-import kotlin.collections.HashMap
 
 class SingUpActivity : AppCompatActivity() {
 
@@ -17,82 +18,146 @@ class SingUpActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_sing_up)
 
-        val email = edtInput_email_signup.text.toString().toLowerCase(Locale.ROOT)
-        val number = edtInput_number_smartphone_signup.text.toString().toLowerCase(Locale.ROOT)
-        val password = edtInput_password_singup.text.toString().toLowerCase(Locale.ROOT)
-        val name = edtInput_name_signup.text.toString().toLowerCase(Locale.ROOT)
-        val login = edtInput_login_singup.text.toString().toLowerCase(Locale.ROOT)
-
-        val user = User(email = email,number_phone = number, password = password, name = name, login = login)
-        edtInput_number_smartphone_signup.addTextChangedListener(Mask.mask("(##)#.####-####", edtInput_number_smartphone_signup))
+        edtInput_number_smartphone_signup.addTextChangedListener(
+            Mask.mask(
+                "(##)#####-####",
+                edtInput_number_smartphone_signup
+            )
+        )
 
         btn_singup.setOnClickListener {
-            saveDatabaseApi()
+            btn_singup.visibility = View.GONE
+            progress_signup.visibility = View.VISIBLE
+            val email = edtInput_email_signup.text.toString().toLowerCase(Locale.ROOT)
+            val number = edtInput_number_smartphone_signup.text.toString().toLowerCase(Locale.ROOT)
+            val password = edtInput_password_singup.text.toString().toLowerCase(Locale.ROOT)
+            val name = edtInput_name_signup.text.toString().toLowerCase(Locale.ROOT)
+            val login = edtInput_login_singup.text.toString().toLowerCase(Locale.ROOT)
+
+            if (email.isNotEmpty() && number.isNotEmpty() && password.isNotEmpty() && name.isNotEmpty() && login.isNotEmpty()) {
+
+                val user = User(
+                    email = email,
+                    number_phone = number,
+                    password = password,
+                    name = name,
+                    login = login
+                )
+                saveDatabaseApi(user)
+
+            }
         }
     }
 
-    fun saveDatabaseApi() {
+    fun saveDatabaseApi(user: User) {
         val db = FirebaseFirestore.getInstance()
 
-        val email = edtInput_email_signup.text.toString().toLowerCase(Locale.ROOT)
 
-        val user : MutableMap<String, String> = HashMap()
-        user["email"] = email
-        user["name"] = edtInput_name_signup.text.toString().toLowerCase(Locale.ROOT)
+       val docRef = db.collection("users").document(user.email)
 
-        db.collection("users")
-            .get()
-            .addOnCompleteListener {
-                if (it.result!!.isEmpty) {
-                    db.collection("users").document(email)
+        docRef.get().addOnSuccessListener {document->
+            when {
+                document?.exists() == false -> {
+                    db.collection("users").document(user.email)
                         .set(user)
                         .addOnSuccessListener {
-                            Toast.makeText(
-                                this@SingUpActivity,
-                                "funciona ",
-                                Toast.LENGTH_SHORT
-                            )
-                                .show()
+                            btn_singup.visibility = View.VISIBLE
+                            progress_signup.visibility = View.GONE
                         }
                         .addOnFailureListener {
                             Toast.makeText(
                                 this@SingUpActivity,
-                                "falhou",
+                                "Verifique sua conexao com a internet",
                                 Toast.LENGTH_SHORT
                             )
                                 .show()
 
-                        }
-                } else {
-                    for (document in it.result!!) {
-                        if (document.id != email.toLowerCase() || document.id.isEmpty())
-                            db.collection("users").document(email)
-                                .set(user)
-                                .addOnSuccessListener {
-                                    Toast.makeText(
-                                        this@SingUpActivity,
-                                        "funciona ",
-                                        Toast.LENGTH_SHORT
-                                    )
-                                        .show()
-                                }
-                                .addOnFailureListener {
-                                    Toast.makeText(
-                                        this@SingUpActivity,
-                                        "falhou",
-                                        Toast.LENGTH_SHORT
-                                    )
-                                        .show()
+                            btn_singup.visibility = View.VISIBLE
+                            progress_signup.visibility = View.GONE
 
-                                }
-                    }
+                        }
+                }
+                document != null -> {
+                    Toast.makeText(this, "Email ja cadastrado", Toast.LENGTH_SHORT).show()
+                    Log.i("teste", document.exists().toString())
+                    btn_singup.visibility = View.VISIBLE
+                    progress_signup.visibility = View.GONE
 
                 }
+                else -> {
+                    Toast.makeText(this,"Erro",Toast.LENGTH_SHORT).show()
+                }
             }
-            .addOnFailureListener {
-                Toast.makeText(this@SingUpActivity, "falhou", Toast.LENGTH_SHORT).show()
+       }
 
-            }
+
+
+
+//        db.collection("users")
+//            .get()
+//            .addOnCompleteListener {
+//                if (it.result!!.isEmpty) {
+//                    db.collection("users").document(user.email)
+//                        .set(user)
+//                        .addOnSuccessListener {
+//                            btn_singup.visibility = View.VISIBLE
+//                            progress_signup.visibility = View.GONE
+//                        }
+//                        .addOnFailureListener {
+//                            Toast.makeText(
+//                                this@SingUpActivity,
+//                                "Verifique sua conexao com a internet",
+//                                Toast.LENGTH_SHORT
+//                            )
+//                                .show()
+//
+//                            btn_singup.visibility = View.VISIBLE
+//                            progress_signup.visibility = View.GONE
+//
+//                        }
+//                } else {
+//                    it.result!!.forEach { document ->
+//                        if (document.id != user.email) {
+//
+//                            db.collection("users").document(user.email)
+//                                .set(user)
+//                                .addOnSuccessListener {
+//                                    btn_singup.visibility = View.VISIBLE
+//                                    progress_signup.visibility = View.GONE
+//                                }
+//                                .addOnFailureListener {
+//                                    Toast.makeText(
+//                                        this@SingUpActivity,
+//                                        "Verifique sua conexao",
+//                                        Toast.LENGTH_SHORT
+//                                    )
+//                                        .show()
+//
+//                                    btn_singup.visibility = View.VISIBLE
+//                                    progress_signup.visibility = View.GONE
+//
+//                                }
+//
+//                        }else{
+//
+//
+//                        }
+//
+//
+//                    }
+//
+//                }
+//            }
+//            .addOnFailureListener {
+//                Toast.makeText(
+//                    this@SingUpActivity,
+//                    "Falhou ao salvar tente novamente",
+//                    Toast.LENGTH_SHORT
+//                ).show()
+//                btn_singup.visibility = View.VISIBLE
+//                progress_signup.visibility = View.GONE
+//
+//            }
     }
 
 }
