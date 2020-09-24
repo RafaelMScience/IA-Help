@@ -23,6 +23,7 @@
         app:startIconDrawable="@drawable/ic_person">
 
         <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/edtInput_login_singin"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/round_border"
@@ -44,8 +45,9 @@
         app:startIconDrawable="@drawable/ic_lock">
 
         <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/edtInput_password_singin"
             android:layout_width="match_parent"
-            android:layout_height="54dp"
+            android:layout_height="wrap_content"
             android:background="@drawable/round_border"
             android:inputType="textPassword"
             android:padding="16dp" />

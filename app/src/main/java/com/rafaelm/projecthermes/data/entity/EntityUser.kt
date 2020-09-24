@@ -8,7 +8,7 @@ import androidx.room.PrimaryKey
 data class EntityUser(
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "id")
-    var id: Int,
+    var id: Int = 0,
 
     @ColumnInfo(name = "name")
     var name: String,
@@ -17,11 +17,5 @@ data class EntityUser(
     var email: String,
 
     @ColumnInfo(name="number_phone")
-    var numberPhone: Int,
-
-    @ColumnInfo(name="login")
-    var login: String,
-
-    @ColumnInfo(name="password")
-    var password: String,
+    var numberPhone: String,
 )

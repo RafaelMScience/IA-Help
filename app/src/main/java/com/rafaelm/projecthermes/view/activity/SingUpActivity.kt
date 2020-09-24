@@ -31,18 +31,16 @@ class SingUpActivity : AppCompatActivity() {
             progress_signup.visibility = View.VISIBLE
             val email = edtInput_email_signup.text.toString().toLowerCase(Locale.ROOT)
             val number = edtInput_number_smartphone_signup.text.toString().toLowerCase(Locale.ROOT)
-            val password = edtInput_password_singup.text.toString().toLowerCase(Locale.ROOT)
+            val password = edtInput_password_singup.text.toString()
             val name = edtInput_name_signup.text.toString().toLowerCase(Locale.ROOT)
-            val login = edtInput_login_singup.text.toString().toLowerCase(Locale.ROOT)
 
-            if (email.isNotEmpty() && number.isNotEmpty() && password.isNotEmpty() && name.isNotEmpty() && login.isNotEmpty()) {
+            if (email.isNotEmpty() && number.isNotEmpty() && password.isNotEmpty() && name.isNotEmpty()) {
 
                 val user = User(
                     email = email,
                     number_phone = number,
                     password = password,
                     name = name,
-                    login = login,
                 )
                 saveDatabaseApi(user)
 

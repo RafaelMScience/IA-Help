@@ -31,13 +31,13 @@ class ChatRepository (application: Application): CoroutineScope{
         }
     }
 
-    fun insertUser(user: User){
+    fun insertUser(user: EntityUser){
         launch {
             insertFunUser(user)
         }
     }
 
-    private suspend fun insertFunUser(user: User){
+    private suspend fun insertFunUser(user: EntityUser){
         withContext(Dispatchers.IO){
             daoChat?.insertUser(user)
         }

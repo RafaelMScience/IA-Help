@@ -14,7 +14,7 @@ interface DAOChat{
     fun insertChat(chat: EntityChat)
 
     @Insert
-    fun insertUser(user: User)
+    fun insertUser(user: EntityUser)
 
     @Query("SELECT * FROM chat_table order by msg_id DESC")
     fun getChat(): LiveData<List<EntityChat>>
