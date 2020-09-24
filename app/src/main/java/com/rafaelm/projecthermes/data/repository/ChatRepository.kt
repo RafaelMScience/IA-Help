@@ -25,6 +25,8 @@ class ChatRepository (application: Application): CoroutineScope{
 
     fun getChat() = daoChat?.getChat()
 
+    fun getUser() = daoChat?.getUser()
+
     fun insetChat(chat: EntityChat){
         launch {
             insert(chat)

@@ -4,11 +4,11 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "User")
+@Entity(tableName = "user")
 data class EntityUser(
-    @PrimaryKey(autoGenerate = true)
+    @PrimaryKey(autoGenerate = false)
     @ColumnInfo(name = "id")
-    var id: Int = 0,
+    var id: Int = 1,
 
     @ColumnInfo(name = "name")
     var name: String,
