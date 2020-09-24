@@ -1,7 +1,7 @@
 package com.rafaelm.projecthermes.view.activity
 
+import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
@@ -10,9 +10,7 @@ import androidx.appcompat.widget.Toolbar
 import com.google.firebase.firestore.FirebaseFirestore
 import com.rafaelm.projecthermes.R
 import com.rafaelm.projecthermes.data.model.firebase.User
-import com.rafaelm.projecthermes.data.repository.ChatRepository
 import com.rafaelm.projecthermes.functions.Mask
-import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.activity_sing_up.*
 import java.util.*
 
@@ -40,26 +38,54 @@ class SingUpActivity : AppCompatActivity() {
             val email = edtInput_email_signup.text.toString().toLowerCase(Locale.ROOT)
             val number = edtInput_number_smartphone_signup.text.toString().toLowerCase(Locale.ROOT)
             val password = edtInput_password_singup.text.toString()
+            val passwordConfirm = edtInput_password_confirm_singup.text.toString()
             val name = edtInput_name_signup.text.toString().toLowerCase(Locale.ROOT)
 
-            if (email.isNotEmpty() && number.isNotEmpty() && password.isNotEmpty() && name.isNotEmpty()) {
+            when {
 
-                val user = User(
-                    email = email,
-                    number_phone = number,
-                    password = password,
-                    name = name,
-                )
-                saveDatabaseApi(user)
+                name.isEmpty() || name.length <= 2 -> {
+                    edtInput_name_signup.error = "Digite o nome"
+                }
+                email.isEmpty() || email.length <= 4 -> {
+                    edtInput_email_signup.error = "Digite o email corretamente"
+                }
+                number.length != 14 || number.isEmpty() -> {
+                    edtInput_number_smartphone_signup.error = "Digite o numero correto"
+                }
+                password.isEmpty() || password.length <= 4 -> {
+                    edtInput_password_singup.error = "Digite o password no minimo"
+                }
+                passwordConfirm.isEmpty() || passwordConfirm != password -> {
+                    edtInput_password_confirm_singup.error = "Password não esta igual"
+                }
 
-            }else{
-                Toast.makeText(this,"Preencha todos os campos porfavor", Toast.LENGTH_SHORT).show()
+                else -> {
+                    val user = User(
+                        email = email,
+                        number_phone = number,
+                        password = password,
+                        name = name,
+                    )
+                    saveDatabaseApi(user)
+                    val i = Intent(this, MainActivity::class.java)
+                    startActivity(i)
+                    finish()
+                    Toast.makeText(
+                        this,
+                        "Cadastrado com sucesso\nseja bem vindo: $name",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+
             }
+
+            btn_singup.visibility = View.VISIBLE
+            progress_signup.visibility = View.GONE
         }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when(item.itemId){
+        return when (item.itemId) {
             android.R.id.home -> {
                 finish()
                 true
@@ -71,9 +97,9 @@ class SingUpActivity : AppCompatActivity() {
     fun saveDatabaseApi(user: User) {
         val db = FirebaseFirestore.getInstance()
 
-       val docRef = db.collection("users").document(user.email)
+        val docRef = db.collection("users").document(user.email)
 
-        docRef.get().addOnSuccessListener {document->
+        docRef.get().addOnSuccessListener { document ->
             when {
                 document?.exists() == false -> {
                     db.collection("users").document(user.email)
@@ -102,10 +128,10 @@ class SingUpActivity : AppCompatActivity() {
 
                 }
                 else -> {
-                    Toast.makeText(this,"Erro",Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Error", Toast.LENGTH_SHORT).show()
                 }
             }
-       }
+        }
 
     }
 
