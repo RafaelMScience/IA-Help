@@ -2,6 +2,7 @@ package com.rafaelm.projecthermes.view.activity
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
@@ -40,13 +41,15 @@ class SingUpActivity : AppCompatActivity() {
             val password = edtInput_password_singup.text.toString()
             val passwordConfirm = edtInput_password_confirm_singup.text.toString()
             val name = edtInput_name_signup.text.toString().toLowerCase(Locale.ROOT)
+            val emailValid = android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
 
+            Log.i("teste", emailValid.toString())
             when {
 
                 name.isEmpty() || name.length <= 2 -> {
                     edtInput_name_signup.error = "Digite o nome"
                 }
-                email.isEmpty() || email.length <= 4 -> {
+                email.isEmpty() || email.length <= 4 || !emailValid -> {
                     edtInput_email_signup.error = "Digite o email corretamente"
                 }
                 number.length != 14 || number.isEmpty() -> {

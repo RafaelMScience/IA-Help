@@ -145,11 +145,8 @@ class MainActivity : AppCompatActivity(), MultiplePermissionsListener, LocationL
     }
 
     override fun onLocationChanged(location: Location) {
-        Toast.makeText(
-            this,
-            "" + location.latitude.toString() + "," + location.longitude.toString(),
-            Toast.LENGTH_SHORT
-        ).show()
+
+        val repository = ChatRepository(application)
         try {
             val geocoder = Geocoder(this@MainActivity, Locale.getDefault())
             val addresses: List<Address> =
@@ -161,24 +158,24 @@ class MainActivity : AppCompatActivity(), MultiplePermissionsListener, LocationL
             val packageManager: PackageManager = packageManager
             val sharingIntent = Intent(Intent.ACTION_VIEW)
             sharingIntent.type = "text/plain"
-            val phone = "5592991211156"
+            repository.getUser()?.observe(this, {
+                it.forEach {
+                    val phone = "55"+it.numberPhone
+                    val shareSub = "Socorro preciso de ajuda estou na:\n$address\nMapa: $uri"
+                    val url =
+                        "https://api.whatsapp.com/send?phone=$phone&text=" + URLEncoder.encode(
+                            shareSub,
+                            "UTF-8"
+                        )
+                    sharingIntent.data = Uri.parse(url)
+                    sharingIntent.setPackage("com.whatsapp")
 
-            val shareSub = "Socorro preciso de ajuda estou na:\n$address\nMapa: $uri"
-            val url =
-                "https://api.whatsapp.com/send?phone=$phone&text=" + URLEncoder.encode(
-                    shareSub,
-                    "UTF-8"
-                )
-//            sharingIntent.putExtra(
-//                Intent.EXTRA_TEXT, "" + ShareSub.trimIndent()
-//            )
-            sharingIntent.data = Uri.parse(url)
-            sharingIntent.setPackage("com.whatsapp")
+                    if (sharingIntent.resolveActivity(packageManager) != null) {
+                        startActivity(sharingIntent)
+                    }
+                }
+            })
 
-            if (sharingIntent.resolveActivity(packageManager) != null) {
-                startActivity(sharingIntent)
-            }
-//            startActivity(Intent.createChooser(sharingIntent, "Share With?"))
         } catch (e: Exception) {
             e.printStackTrace()
         }
