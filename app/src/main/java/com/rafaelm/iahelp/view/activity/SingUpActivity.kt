@@ -12,6 +12,7 @@ import com.rafaelm.iahelp.R
 import com.rafaelm.iahelp.data.entity.EntityUser
 import com.rafaelm.iahelp.data.model.firebase.User
 import com.rafaelm.iahelp.data.repository.ChatRepository
+import com.rafaelm.iahelp.data.savetemp.Prefs
 import com.rafaelm.iahelp.functions.Mask
 import kotlinx.android.synthetic.main.activity_sing_up.*
 import java.util.*
@@ -71,13 +72,6 @@ class SingUpActivity : AppCompatActivity() {
                         name = name,
                     )
                     saveDatabaseApi(user)
-//                    val userEntity = EntityUser(
-//                        email = email,
-//                        name = name,
-//                        numberPhone = number
-//                    )
-//
-//                    repository.insertUser(userEntity)
 
                 }
 
@@ -101,7 +95,7 @@ class SingUpActivity : AppCompatActivity() {
     fun saveDatabaseApi(user: User) {
         val db = FirebaseFirestore.getInstance()
         val repository = ChatRepository(application)
-
+        val sharedPreferences = Prefs(applicationContext)
 
         val docRef = db.collection("users").document(user.email)
 
@@ -126,6 +120,7 @@ class SingUpActivity : AppCompatActivity() {
                                 "Cadastrado com sucesso\nseja bem vindo: ${user.name}",
                                 Toast.LENGTH_SHORT
                             ).show()
+                            sharedPreferences.save("login", true)
                             btn_singup.visibility = View.VISIBLE
                             progress_signup.visibility = View.GONE
                         }

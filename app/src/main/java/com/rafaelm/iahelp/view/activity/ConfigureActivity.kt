@@ -47,6 +47,10 @@ class ConfigureActivity : AppCompatActivity() {
 
         })
 
+        btn_exit.setOnClickListener {
+
+        }
+
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
