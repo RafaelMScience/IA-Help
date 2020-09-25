@@ -28,7 +28,7 @@
         android:layout_height="350dp"
         android:minHeight="100dp"
         app:cardElevation="15dp"
-        app:cardBackgroundColor="#03FF07"
+        app:cardBackgroundColor="@color/colorPrimaryDark"
         app:cardCornerRadius="25dp"
         >
 

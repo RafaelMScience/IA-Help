@@ -7,4 +7,9 @@
         android:title="Ouvir"
         app:showAsAction="ifRoom" />
 
+    <item
+        android:id="@+id/menu_config"
+        android:title="Configuração"
+        app:showAsAction="never"/>
+
 </menu>
