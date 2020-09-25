@@ -1,5 +1,6 @@
 package com.rafaelm.iahelp.view.activity
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
@@ -10,9 +11,9 @@ import com.google.firebase.firestore.SetOptions
 import com.rafaelm.iahelp.R
 import com.rafaelm.iahelp.data.entity.EntityUser
 import com.rafaelm.iahelp.data.repository.ChatRepository
+import com.rafaelm.iahelp.data.savetemp.Prefs
 import com.rafaelm.iahelp.functions.Mask
 import kotlinx.android.synthetic.main.activity_configure.*
-import kotlinx.android.synthetic.main.activity_sing_up.*
 import java.util.*
 
 
@@ -48,7 +49,12 @@ class ConfigureActivity : AppCompatActivity() {
         })
 
         btn_exit.setOnClickListener {
-
+            val sharedPreferences = Prefs(applicationContext)
+            sharedPreferences.save("login", false)
+            val i = Intent(this, LoginActivity::class.java)
+            startActivity(i)
+            finish()
+            repository.deleteUser()
         }
 
     }

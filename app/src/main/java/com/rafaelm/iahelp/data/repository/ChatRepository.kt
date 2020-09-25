@@ -11,7 +11,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 
-class ChatRepository (application: Application): CoroutineScope{
+class ChatRepository(application: Application) : CoroutineScope {
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main
 
@@ -26,26 +26,51 @@ class ChatRepository (application: Application): CoroutineScope{
 
     fun getUser() = daoChat?.getUser()
 
-    fun insetChat(chat: EntityChat){
+
+    fun insetChat(chat: EntityChat) {
         launch {
             insert(chat)
         }
     }
 
-    fun insertUser(user: EntityUser){
+    fun insertUser(user: EntityUser) {
         launch {
             insertFunUser(user)
         }
     }
 
-    private suspend fun insertFunUser(user: EntityUser){
+    fun deleteChat(){
+        launch {
+            deleteFunChat()
+        }
+    }
+
+    private suspend fun deleteFunChat() {
         withContext(Dispatchers.IO){
+            daoChat?.deleteChatData()
+        }
+    }
+
+    fun deleteUser() {
+        launch {
+            deleteFunUser()
+        }
+    }
+
+    private suspend fun deleteFunUser() {
+        withContext(Dispatchers.IO) {
+            daoChat?.deleteUserData()
+        }
+    }
+
+    private suspend fun insertFunUser(user: EntityUser) {
+        withContext(Dispatchers.IO) {
             daoChat?.insertUser(user)
         }
     }
 
-    private suspend fun insert(chat: EntityChat){
-        withContext(Dispatchers.IO){
+    private suspend fun insert(chat: EntityChat) {
+        withContext(Dispatchers.IO) {
 
             daoChat?.insertChat(chat)
         }

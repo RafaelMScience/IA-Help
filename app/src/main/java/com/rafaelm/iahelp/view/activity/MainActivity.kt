@@ -63,11 +63,23 @@ class MainActivity : AppCompatActivity(), MultiplePermissionsListener, LocationL
 
     override fun onStart() {
 
+        Dexter.withContext(this)
+            .withPermissions(
+                Manifest.permission.RECORD_AUDIO,
+                Manifest.permission.CALL_PHONE,
+                Manifest.permission.ACCESS_FINE_LOCATION,
+
+                )
+            .withListener(this)
+            .check()
+
+
         val repository = ChatRepository(application)
         recyclerview_chat.layoutManager = LinearLayoutManager(applicationContext)
         repository.getChat()?.observe(this, androidx.lifecycle.Observer {
             recyclerview_chat.adapter = RecyclerViewAdapterChat(it)
         })
+
 
         btn_speech.text = "Falar"
         val icMicDrawable = getDrawable(R.drawable.ic_mic)
@@ -92,16 +104,6 @@ class MainActivity : AppCompatActivity(), MultiplePermissionsListener, LocationL
 
         //mudar cor status
         window.statusBarColor = ContextCompat.getColor(this, R.color.colorPrimaryDark)
-
-        Dexter.withContext(this)
-            .withPermissions(
-                Manifest.permission.RECORD_AUDIO,
-                Manifest.permission.CALL_PHONE,
-                Manifest.permission.ACCESS_FINE_LOCATION,
-
-                )
-            .withListener(this)
-            .check()
 
         clickButtonSend()
 
